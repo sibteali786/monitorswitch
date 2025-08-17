@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	verbose bool
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "monitorswitch [command]",
 	Short: "A cross-platform monitor control tool",
@@ -26,4 +30,5 @@ func Execute() {
 
 func init() {
 	// This is where you'll add global flags later
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 }
