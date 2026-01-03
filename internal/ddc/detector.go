@@ -517,72 +517,7 @@ func (d *Detector) parseSystemctl(info *MacOSInfo) {
 
 // Monitor detection methods
 func (d *Detector) DetectMonitors() ([]Monitor, error) {
-	switch d.osType {
-	case OSLinux:
-		return d.detectLinuxMonitors()
-	case OSMacOS:
-		return d.detectMacOSMonitors()
-	default:
-		return []Monitor{}, fmt.Errorf("monitor detection not implemented for OS: %s", d.osType)
-	}
-}
+	client := NewDDCClientImpl(d.osType)
 
-func (d *Detector) detectLinuxMonitors() ([]Monitor, error) {
-	if _, err := exec.LookPath("ddcutil"); err != nil {
-		return []Monitor{}, fmt.Errorf("ddcutil not found: %v", err)
-	}
-
-	cmd := exec.Command("ddcutil", "detect")
-	output, err := cmd.Output()
-	if err != nil {
-		return []Monitor{}, fmt.Errorf("ddcutil detect failed: %v", err)
-	}
-	if len(strings.TrimSpace(string(output))) == 0 {
-		return []Monitor{}, nil
-	}
-
-	// Placeholder - will implement real parsing later
-	return []Monitor{}, nil
-}
-
-func (d *Detector) detectMacOSMonitors() ([]Monitor, error) {
-	// Check for m1ddc first
-	if _, err := exec.LookPath("m1ddc"); err == nil {
-		return d.detectWithM1DDC()
-	}
-
-	// Check for ddcctl
-	if _, err := exec.LookPath("ddcctl"); err == nil {
-		return d.detectWithDDCCTL()
-	}
-
-	return []Monitor{}, fmt.Errorf("neither m1ddc nor ddcctl found")
-}
-
-func (d *Detector) detectWithM1DDC() ([]Monitor, error) {
-	cmd := exec.Command("m1ddc", "display", "list")
-	output, err := cmd.Output()
-	if err != nil {
-		return []Monitor{}, fmt.Errorf("m1ddc list failed: %w", err)
-	}
-
-	// For now, return empty if no output
-	if len(strings.TrimSpace(string(output))) == 0 {
-		return []Monitor{}, nil
-	}
-
-	// Placeholder - will implement real parsing later
-	return []Monitor{}, nil
-}
-
-func (d *Detector) detectWithDDCCTL() ([]Monitor, error) {
-	cmd := exec.Command("ddcctl", "-d", "1")
-	_, err := cmd.Output()
-	if err != nil {
-		// If display 1 doesn't exist, no monitors
-		return []Monitor{}, nil
-	}
-
-	// Placeholder - will implement real parsing later
-	return []Monitor{}, nil
+	return client.DetectMonitors()
 }
